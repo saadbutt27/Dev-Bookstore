@@ -15,6 +15,7 @@ const AddProduct = () => {
         shipping: '',
         quantity: 0,
         photo: '',
+        pdfFile: '', // New state for PDF file
         loading: false,
         error: '',
         createdProduct: '',
@@ -45,16 +46,17 @@ const AddProduct = () => {
     }, [])
     
 
-    const handleChange = name => e => {
-        const value = name ==='photo' ? e.target.files[0] : e.target.value
-        formData.set(name, value)
-        setValues({...values, [name]: value}) 
+    const handleChange = name => event => {
+        const value = name === 'photo' || name === 'pdfFile' ? event.target.files[0] : event.target.value;
+        formData.set(name, value);
+        setValues({ ...values, [name]: value });
     }
 
     const clickSubmit = e => {
         e.preventDefault();
         setValues({...values, error: '', loading: true});
-
+        // Log FormData before API call
+        // console.log([...formData.entries()]);
         createProduct(user._id, token, formData)
         .then(data => {
             if(data.err)
@@ -65,7 +67,7 @@ const AddProduct = () => {
             else
             {
                 setValues({
-                    ...values, name: '', description: '', photo: '', price: '', quantity: 0, loading: '', 
+                    ...values, name: '', description: '', photo: '', pdfFile: '', price: '', quantity: 0, loading: '', 
                     category: '', shipping: '',createdProduct: data.name
                 })
             }
@@ -79,6 +81,13 @@ const AddProduct = () => {
             <div className="form-group">
                 <label className="btn btn-secondary">
                 <input onChange={handleChange('photo')} type="file" name="photo" accept="image/*" />
+                </label>
+            </div>
+
+            <h4>Upload PDF</h4>
+            <div className="form-group">
+                <label className="btn btn-secondary">
+                    <input onChange={handleChange('pdfFile')} type="file" className="form-control" name="pdfFile" accept=".pdf" />
                 </label>
             </div>
 

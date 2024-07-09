@@ -9,13 +9,14 @@ const Card = ({product, showViewProductButton = true, showAddToCartButton = true
 
     const [redirect, setRedirect] = useState(false);
     const [count, setCount] = useState(product.count);
-    
+    const [loading, setLoading] = useState(false); // Loader state
+
     const showViewButton = (showViewProductButton) => {
         return (
             showViewProductButton && (
                 <Link to ={`/product/${product._id}`} className="mr-2">
                     <button className="btn btn-outline-primary mt-2 mb-2 mr-2">
-                            View Product
+                        View Product
                     </button>    
                 </Link>
             )
@@ -37,7 +38,7 @@ const Card = ({product, showViewProductButton = true, showAddToCartButton = true
 
     const showAddToCart = (showAddToCartButton) => {
         return (
-            showAddToCartButton && <button onClick={addToCart} className="btn btn-outline-warning mt-2 mb-2">
+            showAddToCartButton && <button onClick={addToCart} className="btn btn-outline-warning mt-2 mb-2 mr-2">
                 Add to Cart
             </button>
         )
@@ -84,6 +85,69 @@ const Card = ({product, showViewProductButton = true, showAddToCartButton = true
             </div>
         </div>
     }
+
+    const openPDF = () => {
+        setLoading(true); // Start loading
+        fetch(`/api/product/pdf/${product._id}`, {
+            method: 'GET',
+            headers: {
+                Accept: 'application/pdf',
+            },
+        })
+        .then(response => {
+            if (!response.ok) {
+                setLoading(false); // Stop loading
+                throw new Error('Network response was not ok');
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            const url = URL.createObjectURL(blob);
+            // console.log(url)
+            const a = document.createElement('a');
+            a.href = url;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setLoading(false); // Stop loading in case of error
+        })
+        .catch(err => {
+            setLoading(false); // Stop loading in case of error
+            alert("Error fetching or opening PDF:", err)
+            console.error('Error fetching or opening PDF:', err);
+            // Handle error (e.g., show error message)
+        });
+    };
+    
+
+    const showOpenPDFButton = () => {
+        if (product.pdfFile && product.pdfFile.data) {
+            // Conditionally enable button if PDF exists
+            return (
+                <button
+                    onClick={openPDF}
+                    className="btn btn-outline-success mt-2 mb-2"
+                    disabled={loading}
+                    style={{ cursor: loading ? 'not-allowed' : 'pointer' }}
+                >
+                    {loading ? 'Loading...' : 'Open PDF'}
+                </button>
+            );
+        } else {
+            // Disable button if no PDF
+            return (
+                <button
+                    className="btn btn-outline-danger mt-2 mb-2"
+                    disabled
+                    style={{ cursor: 'not-allowed' }}
+                >
+                    No PDF Available
+                </button>
+            );
+        }
+    };
     
     return (
             <div className="card">
@@ -93,20 +157,23 @@ const Card = ({product, showViewProductButton = true, showAddToCartButton = true
                     <ShowImage item={product} url="product" />
                     
                     <p className = "mt-2">{product.description}</p>
-                    <p className = "font-weight-bold">₹ {product.price}</p>
+                    <p className = "font-weight-bold">Rs. {product.price}</p>
                     <p className = "black-10">Category: {product.category && product.category.name}</p>
+                    <p className = "black-10">Category: {product.pdfUrl && product.pdfUrl}</p>
                     <p className = "black-8">Added {moment(product.createdAt).fromNow()}</p>
 
                     {showStock(product.quantity)}
                     <br />
-                        {showViewButton(showViewProductButton)}
-                    
+                    {showViewButton(showViewProductButton)}
                     
                     {showRemoveButton(showRemoveProductButton)}
 
-                        {showAddToCart(showAddToCartButton)}
+                    {showAddToCart(showAddToCartButton)}
                     
                     {showCartUpdateOptions(cartUpdate)}
+
+                    {showOpenPDFButton()}
+                    
                 </div>
             </div>
             

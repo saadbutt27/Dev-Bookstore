@@ -1,13 +1,25 @@
 const formidable = require('formidable');
-const fs  =require('fs');
+const fs=require('fs');
 const _ = require('lodash');
-
-
+const { Readable } = require('stream'); // Import Readable from stream
 // Product Schema
 const Product = require('../models/product');
-
 // Handle database error
 const {errorHandler} = require('../helpers/dbErrorHandler');
+
+exports.getRecommendations = async (req, res) => {
+    const bookName = req.query.book_name;
+    if (!bookName) {
+        return res.status(400).send({ error: 'No book name provided' });
+    }
+    
+    try {
+        const response = await axios.get(`http://localhost:5000/recommend?book_name=${bookName}`);
+        res.send(response.data);
+    } catch (error) {
+        res.status(500).send({ error: 'Failed to get recommendations' });
+    }
+};
 
 
 // Find product by id
@@ -25,6 +37,31 @@ exports.productById = async(req, res, next, id) => {
     });
 };
 
+// Backend route handler to fetch and stream PDF
+exports.getPDF = (req, res, next) => {
+    const productId = req.params.productId;
+
+    Product.findById(productId)
+        .exec((err, product) => {
+            if (err || !product) {
+                return res.status(400).json({
+                    error: "Product not found"
+                });
+            }
+            if (!product.pdfFile.data) {
+                return res.status(400).json({
+                    error: "PDF not found"
+                });
+            }
+            
+            // Stream the PDF data directly to the response
+            res.set('Content-Type', product.pdfFile.contentType);
+            const stream = Readable.from(product.pdfFile.data); // Assuming product.pdfFile.data is a Buffer or streamable data
+            stream.pipe(res);
+        });
+};
+
+
 // Get a single product
 exports.read = async(req, res) => {
     req.product.photo = undefined;
@@ -32,57 +69,55 @@ exports.read = async(req, res) => {
 }
 
 // Create a new product
-exports.create = async(req, res) => {
-    
-    // Formidable is used to handle form data. we are using it to handle image upload
+exports.create = async (req, res) => {
+    // Formidable is used to handle form data. We are using it to handle file uploads.
     let form = new formidable.IncomingForm();
-    form.keepExtensions = true // Extension for images
+    form.keepExtensions = true; // Keep file extensions for uploaded files
 
     form.parse(req, (err, fields, files) => {
-        if(err)
-        {
-            return res.status(400).json({msg: 'Image could not be uploaded'});
+        if (err) {
+            return res.status(400).json({ msg: 'Image could not be uploaded' });
         }
 
-        // check for all fields
-        const {name, description, price, quantity, category, shipping} = fields;
-        if(!name || !description || !price || !quantity || !category || !shipping)
-        {
-            return res.status(400).json({
-                err: "All fields are required"
-            })
+        // Check for all required fields
+        const { name, description, price, quantity, category, shipping } = fields;
+        if (!name || !description || !price || !quantity || !category || !shipping) {
+            return res.status(400).json({ err: 'All fields are required' });
         }
 
-        // Create new product now
+        // Create a new product instance
         let product = new Product(fields);
 
-        // Handle files
-        if(files.photo)
-        {
+        // Handle photo file upload
+        if (files.photo) {
+            // console.log("Photo")
             // Validate file size less than 1 MB
-            if(files.photo.size > 1000000)
-            {
-                return res.status(400).json({
-                    msg: "File size should be less than 1 mb"
-                })
+            if (files.photo.size > 1000000) {
+                return res.status(400).json({ msg: 'Photo file size should be less than 1 MB' });
             }
-
             product.photo.data = fs.readFileSync(files.photo.path);
             product.photo.contentType = files.photo.type;
         }
+        
+        // Handle PDF file upload
+        if (files.pdfFile) {
+            // console.log("Pdf file")
+            // Validate file size less than 10 MB (adjust as per your requirement)
+            if (files.pdfFile.size > 10000000) {
+                return res.status(400).json({ msg: 'PDF file size should be less than 10 MB' });
+            }
+            product.pdfFile.data = fs.readFileSync(files.pdfFile.path);
+            product.pdfFile.contentType = files.pdfFile.type;
+        }
 
-        // Save the new product
+        // Save the new product to MongoDB
         product.save((err, data) => {
-            if(err)
-            return res.status(400).json({msg: errorHandler(err)});
-
-            res.json({
-                product: data
-            });
+            if (err) {
+                return res.status(400).json({ msg: 'Failed to save product', error: err });
+            }
+            res.json({ product: data });
         });
-
     });
-
 };
 
 // Update a product

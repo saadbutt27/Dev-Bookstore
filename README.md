@@ -2,21 +2,33 @@
 
 A complete e-commerce app built on the MERN stack that sells developer books.
 
+This project is cloned from an existing project which exists in this repository:
+- https://github.com/Anantm007/Dev-Bookstore/tree/master
+
+## New Features
+- Users will get recommendations while searching a book.
+- Users can open pdf of a book if available.
+- Minimal changes to UI to make it presentable.
+
 ## Project Setup
 
 ```javascript
-1. Clone the repo
-2. cd Dev-Bookstore
-3. npm install
-4. make a .env file with the following keys: DATABASE, JWT_SECRET, BRAINTREE_MERCHANT_ID, BRAINTREE_PUBLIC_KEY, BRAINTREE_PRIVATE_KEY, EMAILID, EMAILPASSWORD, NAME
+1. Clone the repo in your desired directory in your system using this command 'git clone https://github.com/saadbutt27/Dev-Bookstore.git'
+2. Open the cmd from that directory and write 'cd Dev-Bookstore' 
+3. Run 'npm install'
+4. make a .env file with the following credentials: DATABASE, JWT_SECRET, BRAINTREE_MERCHANT_ID, BRAINTREE_PUBLIC_KEY, BRAINTREE_PRIVATE_KEY, EMAILID, EMAILPASSWORD, NAME
 5. cd client
 6. npm install
 7. cd ..
-5. npm run dev
-6. Open the project on 127.0.0.1:3010
+8. Open a new terminal and Run 'cd recommendation-service'
+9. Run 'pip install -r requirements.txt'
+10. Run 'python app.py'
+11. Go back to first terminal
+12. Run 'npm run dev'
+13. The project will automatically open, you can use this url to open the project 127.0.0.1:3010
 ```
 
-## Features
+## Existing Features
 
 - User signup/signin with welcome email
 - Create Category and Product by Admin
@@ -38,14 +50,6 @@ A complete e-commerce app built on the MERN stack that sells developer books.
 - Express.js
 - React.js
 - Node.js
-
-### Check out the deployed application at:
-
-- https://devbookstore.herokuapp.com/
-
-#### Contributiong
-
-Feel free to fork this repo and raise an issue or submit a PR in case of any bugs.
 
 ### Resources:
 

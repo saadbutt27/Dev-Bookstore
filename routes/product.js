@@ -4,11 +4,14 @@ const router = express.Router();
 // Middleware
 const {requireSignin, isAdmin, isAuth} = require('../controllers/auth');
 const {userById} = require('../controllers/user');
+const { getRecommendations, getPDF } = require('../controllers/product');
 
 // Require the actual controller
 const {create, productById, read, remove, update, list, listRelated, listCategories, listBySearch, listSearch, photo} = require('../controllers/product');
 
 // Routes
+router.get('/recommend', getRecommendations);
+router.get('/product/pdf/:productId', getPDF);
 router.post('/product/create/:userId', requireSignin, isAuth, isAdmin, create);
 router.get('/product/:productId', read);
 router.get('/products', list);

@@ -11,7 +11,12 @@ const Search = () => {
         searched: false
     });
 
+    const [recommendData, setRecommendData] = useState({
+        recommendedBooks: []
+    });
+
     const { categories, category, search, results, searched } = data;
+    const { recommendedBooks } = recommendData;
 
     const loadCategories = () => {
         getCategories().then(data => {
@@ -26,6 +31,21 @@ const Search = () => {
     useEffect(() => {
         loadCategories();
     }, []);
+
+    const searchRecommendations = async (bookName) => {
+        try {
+            const book_name = bookName.toLowerCase() 
+            const response = await fetch(`http://localhost:5000/recommend?book_name=${book_name}`);
+            if (!response.ok) {
+                throw new Error(await response.json());
+            }
+            const result = await response.json();
+            setRecommendData({ recommendedBooks: result.recommendations || [] });
+            } catch (error) {
+                // console.error("Not Found: ", error);
+                setRecommendData({ recommendedBooks: [] });
+        }
+    };
 
     const searchData = () => {
         // console.log(search, category);
@@ -45,6 +65,7 @@ const Search = () => {
     const searchSubmit = e => {
         e.preventDefault();
         searchData();
+        searchRecommendations(search);
     };
 
     const handleChange = name => event => {
@@ -79,6 +100,24 @@ const Search = () => {
             </div>
         );
     };
+
+    const toggleDropdown = () => {
+        const dropdownMenu = document.getElementById("recommendedDropdown");
+        dropdownMenu.classList.toggle("show");
+    };
+
+    const recommendedDropdown = () => (
+        <div className="dropdown">
+            <button className="btn btn-secondary dropdown-toggle" type="button" onClick={toggleDropdown}>
+                Recommended Books
+            </button>
+            <div className="dropdown-menu" id="recommendedDropdown">
+                {recommendedBooks.map((book, index) => (
+                    <a className="dropdown-item" href="#" key={index}>{book}</a>
+                ))}
+            </div>
+        </div>
+    );
 
     const searchForm = () => (
         <form onSubmit={searchSubmit}>
@@ -120,6 +159,7 @@ const Search = () => {
             <div className="container mb-3">{searchForm()}</div>
             <div className="container-fluid mb-3">
                 {searchedProducts(results)}
+                {searched && recommendedBooks.length > 0 && recommendedDropdown()}
             </div>
         </div>
     );

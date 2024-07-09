@@ -39,6 +39,7 @@ const Home = () => {
             else
             {
                 setProductsByArrival(data);
+                // console.log(productsbyArrival)
                 setLoading(false);
             }
         })
@@ -52,8 +53,8 @@ const Home = () => {
     )
 
     useEffect(() => {
-        loadProductsBySell()
         loadProductsByArrival()
+        loadProductsBySell()
         showLoading()
         //eslint-disable-next-line
     }, [])

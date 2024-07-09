@@ -45,6 +45,10 @@ const productSchema = new mongoose.Schema({
     shipping: {
         type: Boolean,
         required: false
+    },
+    pdfFile: { // New field for storing PDF file path
+        data: Buffer,
+        contentType: String
     }
  }, 
     { timestamps: true }
