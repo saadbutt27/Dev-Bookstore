@@ -1,2 +1,4 @@
 node_modules
 .env
+client/src/core/HeroSection.js
+client/src/core/hero-styles.css
