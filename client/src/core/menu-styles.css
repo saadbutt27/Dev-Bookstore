@@ -44,13 +44,14 @@ body {
     font-size: large;
 }
 
-.navbar .nav-links a {
+.navbar .nav-links a, span {
     color: white;
     text-decoration: none;
     padding: 0.5rem 1rem;
+    cursor: pointer;
 }
 
-.navbar .nav-links a:hover {
+.navbar .nav-links a:hover, span:hover {
     background: #f0f0f0;
     color: black;
     border-radius: 5px;

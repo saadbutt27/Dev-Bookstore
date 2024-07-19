@@ -60,7 +60,7 @@ const Menu = ({ history }) => {
                             <Link className="nav-link" style={isActive(history, '/about')} to="/about">ABOUT</Link>
                         </li>
                         <li className="nav-item ml-auto">
-                            <span className="nav-link" style={{ cursor: 'pointer', color: 'black' }} onClick={() => signout(() => {
+                            <span className="nav-link" onClick={() => signout(() => {
                                 history.push('/');
                             })}>LOGOUT</span>
                         </li>
